@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+//#include "getch.h"
 #include <conio.h>
 #define MAX_Flight 50   // 最大航班数
 #define MAX_Passenger 20    // 单航班最多乘客数
@@ -16,14 +17,16 @@ typedef struct Flight
     int fnum;	        //票数
 }Flight;
 
-typedef struct Passenger{
+typedef struct Passenger
+{
     char pid[20];	    //身份证
     char pname[10];	    //姓名
     char password[20];	//密码
 	char tell[20];	    //电话
 }Passenger;
 
-typedef struct Order{
+typedef struct Order
+{
     char pid[20];	//身份证
     char fid[20];	//航班号
 	int num;	    //票数
