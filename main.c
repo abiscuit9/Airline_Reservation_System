@@ -3,66 +3,67 @@
 #include <string.h>
 #include <stdbool.h>
 #include <conio.h>
-#define MAX_Flight 50
-#define MAX_Passenger 20
-#define MAX_Order 50
+#define MAX_Flight 50   // 最大航班数
+#define MAX_Passenger 20    // 单航班最多乘客数
+#define MAX_Order 50    // 最大订票数
 
 typedef struct Flight
 {
-    char fid[20];         //航班号
-	char fname[20];	//航班名称
-    char start[10];  //起点
-    char end[10];     //终点
-    int fnum;	//票数
+    char fid[20];       //航班号
+	char fname[20];	    //航班名称
+    char start[10];     //起点
+    char end[10];       //终点
+    int fnum;	        //票数
 }Flight;
 
 typedef struct Passenger{
-    char pid[20];	//身份证
-    char pname[10];	//姓名
+    char pid[20];	    //身份证
+    char pname[10];	    //姓名
     char password[20];	//密码
-	char tell[20];	//电话
+	char tell[20];	    //电话
 }Passenger;
 
 typedef struct Order{
     char pid[20];	//身份证
     char fid[20];	//航班号
-	int num;	//票数
+	int num;	    //票数
 }Order;
 
-Flight *FLI;
+Flight *FLI;    // 定义全局变量
 Passenger *PAS;
 Order *ORD;
 
 char start[10]; //起点
 char end[10];   //终点
 char search_fid[50][20];    //符合条件的航班号
-int search_fnum[50];    //符合条件的航班票数
-int online = 0; //是否登录的变量
-char online_pid[20];    //在线用户的身份证
-int search_num = 0;    //符合条件的航班数
+int search_fnum[50];        //符合条件的航班票数
+int online = 0;             //是否登录的变量
+char online_pid[20];        //在线用户的身份证
+int search_num = 0;         //符合条件的航班数
 
-void init_sys(void);	// 系统初始化
-void show_flight(void);	// 显示航班表
-void start_sys(void);	// 系统开始运行
-void exit_sys(void);	// 退出系统
-void menu(void);		// 生成主菜单
-void login(void);       // 登录
-void logout(void);  //用户登出
+void init_sys(void);	    // 系统初始化
+void show_flight(void);	    // 显示航班表
+void start_sys(void);	    // 系统开始运行
+void exit_sys(void);	    // 退出系统
+void menu(void);		    // 生成主菜单
+void login(void);           // 登录
+void logout(void);          //用户登出
 void passenger_info(void);  //查询旅客信息
 bool change_pas_info(void); //修改旅客信息
 void search_start(void);	// 生成查询页面
-bool search(void);	// 查询航班
-void order_list(void);	// 生成订单表
-void del_order(void);	// 退票
-void clear_stdin(void);	// 清除输入缓冲区
+bool search(void);	        // 查询航班
+void order_list(void);	    // 生成订单表
+void del_order(void);	    // 退票
+void clear_stdin(void);	    // 清除输入缓冲区
 char* get_str(char* str,size_t len);  // 获取字符串
-char get_cmd(char start,char end);	// 获取cmd命令
+char get_cmd(char start,char end);	  // 获取cmd命令
 
+// 主函数
 int main()
 {
-	init_sys();
-	start_sys();
-	exit_sys();
+	init_sys();     // 系统初始化
+	start_sys();    // 系统开始运行
+	exit_sys();     // 系统结束
 	return 0;
 }
 
@@ -75,14 +76,26 @@ void init_sys(void)
 	ORD = calloc(MAX_Order,sizeof(Order));
 	printf("system_init...\n");
 
+    // 以只读方式打开 order.txt,如果文件不存在则打开失败，返回值为空。
 	FILE* ofrp = fopen("order.txt","r");
+    if(NULL == ofrp)    // 打开失败直接退出
+    {
+        printf("order.txt open failed!\n");
+        exit(0);
+    }
     int i=0;
-	for(i=0; i<MAX_Order; i++)	//读取文本中的数据到内存
-	{	int num = 0;
+	for(i=0; i<MAX_Order; i++)	//读取文本中的数据到内存，全局变量ORD中
+	{	
+        int num = 0;
 		num = fscanf(ofrp,"%s %s %d\n",ORD[i].pid,ORD[i].fid,&ORD[i].num);
 	}
 
 	FILE* ffrp = fopen("flight.txt","r");
+    if(NULL == ffrp)
+    {
+        printf("flight.txt open failed!\n");
+        exit(0);
+    }
 	for(i=0; i<MAX_Flight; i++)
 	{
 		int num = 0;
@@ -90,6 +103,11 @@ void init_sys(void)
 	}
 
 	FILE* pfrp = fopen("passenger.txt","r");
+    if(NULL == pfrp)
+    {
+        printf("passenger.txt open failed!\n");
+        exit(0);
+    }
 	for(i=0; i<MAX_Passenger; i++)
 	{
 		int num = 0;
@@ -119,7 +137,7 @@ void start_sys(void)
 	while(true)
 	{
 		menu();
-		switch(get_cmd('0','7'))
+		switch(get_cmd('0','7')) // 获取键盘输入
 		{
 			case '1': search_start(); break;
 			case '2': order_list(); break;
@@ -150,6 +168,7 @@ void exit_sys(void)
 		}
 	}
 
+    // 以只写方式打开文件flight.txt，如果文件不存在则创建，如果文件存在则把内容清空。
 	FILE* ffwp = fopen("flight.txt","w");
 	printf("insert flight.txt\n");
 	for(i=0; i<MAX_Flight; i++)
